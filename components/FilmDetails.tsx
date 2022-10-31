@@ -3,18 +3,7 @@ import { IFilm, getFilm } from "../libs/swapi";
 import Detail from "./common/Detail";
 
 const FilmDetails = ({ id }: { id: string }) => {
-  const [film, setFilm] = useState<IFilm>();
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      setIsLoading(true);
-      const res = await getFilm({ id });
-      setFilm(res);
-      setIsLoading(false);
-    })();
-  }, [id]);
-
+  const { film, isLoading } = useFilm({ id });
   if (isLoading) return <div>loading</div>;
   if (!film) return null;
 
@@ -35,6 +24,22 @@ const FilmDetails = ({ id }: { id: string }) => {
       </Detail>
     </div>
   );
+};
+
+const useFilm = ({ id }: { id: string }) => {
+  const [film, setFilm] = useState<IFilm>();
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      setIsLoading(true);
+      const res = await getFilm({ id });
+      setFilm(res);
+      setIsLoading(false);
+    })();
+  }, [id]);
+
+  return { film, isLoading };
 };
 
 export default FilmDetails;

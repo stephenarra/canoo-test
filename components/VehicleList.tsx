@@ -8,9 +8,50 @@ const VehicleList = ({
   onFilmSelect: (id: string) => void;
 }) => {
   const [page, setPage] = useState(1);
+  const { isLoading, error, metadata, data } = useVehicles({ page });
+
+  if (isLoading) return <div className="p-4">loading</div>;
+
+  return (
+    <div className="flex-1 overflow-auto">
+      {!!error && <div className="text-red-600">{error}</div>}
+      {data.map((vehicle) => (
+        <VehicleItem
+          key={vehicle.url}
+          onFilmSelect={onFilmSelect}
+          vehicle={vehicle}
+        />
+      ))}
+      <div className="flex justify-between p-4">
+        {metadata.previous ? (
+          <button
+            className="mr-4"
+            onClick={() => {
+              setPage(page - 1);
+            }}
+          >
+            {`< Previous`}
+          </button>
+        ) : (
+          <div />
+        )}
+        {metadata.next && (
+          <button
+            onClick={() => {
+              setPage(page + 1);
+            }}
+          >
+            {`Next >`}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const useVehicles = ({ page = 1 }: { page: number }) => {
   const [vehicles, setVehicles] = useState<IVehicle[]>([]);
   const [pageInfo, setPageInfo] = useState({ next: false, previous: false });
-
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>();
 
@@ -29,43 +70,12 @@ const VehicleList = ({
     })();
   }, [page]);
 
-  if (isLoading) return <div className="p-4">loading</div>;
-
-  return (
-    <div className="flex-1 overflow-auto">
-      {!!error && <div className="text-red-600">{error}</div>}
-      {vehicles.map((vehicle) => (
-        <VehicleItem
-          key={vehicle.url}
-          onFilmSelect={onFilmSelect}
-          vehicle={vehicle}
-        />
-      ))}
-      <div className="flex justify-between p-4">
-        {pageInfo.previous ? (
-          <button
-            className="mr-4"
-            onClick={() => {
-              setPage(page - 1);
-            }}
-          >
-            {`< Previous`}
-          </button>
-        ) : (
-          <div />
-        )}
-        {pageInfo.next && (
-          <button
-            onClick={() => {
-              setPage(page + 1);
-            }}
-          >
-            {`Next >`}
-          </button>
-        )}
-      </div>
-    </div>
-  );
+  return {
+    data: vehicles,
+    metadata: pageInfo,
+    isLoading,
+    error,
+  };
 };
 
 export default VehicleList;
